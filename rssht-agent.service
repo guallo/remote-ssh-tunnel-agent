@@ -1,0 +1,13 @@
+[Unit]
+Description=Remote SSH Tunnel Agent
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=exec
+ExecStart=/opt/remote-ssh-tunnel-agent/rssht-agent.sh
+Restart=always
+User=rssht-agent
+
+[Install]
+WantedBy=multi-user.target
