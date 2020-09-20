@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 Type=exec
-ExecStart=/opt/remote-ssh-tunnel-agent/rssht-agent.sh
+ExecStart=/home/rssht-agent/remote-ssh-tunnel-agent/rssht-agent.sh
 Restart=always
 User=rssht-agent
 
