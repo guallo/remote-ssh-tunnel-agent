@@ -6,53 +6,64 @@
 
 1.  Create the user that will run the *agent service*:
 
-    ```bash
-    sudo adduser --system --group rssht-agent
-    ```
+```bash
+sudo adduser --system --group rssht-agent
+```
 
-2.  Generate the public/private rsa key pair the *agent* will use to connect to the *intermediate SSH server*, replace `<AGENT-ID>` accordingly:
+2.  Change to user `rssht-agent` and its `HOME` directory:
 
-    ```bash
-    sudo -H -u rssht-agent bash -c 'ssh-keygen -C "<AGENT-ID>" -N "" -f "$HOME/.ssh/id_rsa"'
-    ```
+```bash
+sudo -H -u rssht-agent bash
+cd
+```
 
-3.  Copy the public key to the *intermediate SSH server*, replace `<INTERMEDIATE-SSH-USER>`, `<INTERMEDIATE-SSH-SERVER>` and `<INTERMEDIATE-SSH-PORT>` accordingly (see [the configuration of the intermediate SSH server](#manual-1)):
+3.  Generate the public/private rsa key pair the *agent* will use to connect to the *intermediate SSH server*, replace `<AGENT-ID>` accordingly:
 
-    ```bash
-    sudo -H -u rssht-agent bash -c 'ssh-copy-id -i "$HOME/.ssh/id_rsa.pub" <INTERMEDIATE-SSH-USER>@<INTERMEDIATE-SSH-SERVER> -p <INTERMEDIATE-SSH-PORT>'
-    ```
+```bash
+ssh-keygen -C "<AGENT-ID>" -N "" -f ".ssh/id_rsa"
+```
 
-4.  Download the source code:
+4.  Copy the public key to the *intermediate SSH server*, replace `<INTERMEDIATE-SSH-USER>`, `<INTERMEDIATE-SSH-SERVER>` and `<INTERMEDIATE-SSH-PORT>` accordingly (see [the configuration of the intermediate SSH server](#manual-1)):
 
-    ```bash
-    cd /opt
-    sudo git clone https://github.com/guallo/remote-ssh-tunnel-agent.git
-    cd remote-ssh-tunnel-agent
-    ```
+```bash
+ssh-copy-id -i ".ssh/id_rsa.pub" <INTERMEDIATE-SSH-USER>@<INTERMEDIATE-SSH-SERVER> -p <INTERMEDIATE-SSH-PORT>
+```
 
-5.  Configure the *agent* with the corresponding `<INTERMEDIATE-OPTION>`'s (see [the configuration of the intermediate SSH server](#manual-1)):
+5.  Download and change to the source code directory:
 
-    ```bash
-    sudo sed -i 's/^\(SSH_USER=\).*$/\1<INTERMEDIATE-SSH-USER>/' rssht-agent.sh
-    sudo sed -i 's/^\(SSH_SERVER=\).*$/\1<INTERMEDIATE-SSH-SERVER>/' rssht-agent.sh
-    sudo sed -i 's/^\(SSH_PORT=\).*$/\1<INTERMEDIATE-SSH-PORT>/' rssht-agent.sh
-    sudo sed -i 's!^\(SWAP_DIRECTORY=\).*$!\1"<INTERMEDIATE-SWAP-DIRECTORY>"!' rssht-agent.sh
-    ```
+```bash
+git clone https://github.com/guallo/remote-ssh-tunnel-agent.git
+cd remote-ssh-tunnel-agent
+```
 
-6.  Give execution permission to the *agent*'s group:
+6.  Configure the *agent* with the corresponding `<INTERMEDIATE-OPTION>`'s (see [the configuration of the intermediate SSH server](#manual-1)):
 
-    ```bash
-    sudo chown :rssht-agent rssht-agent.sh
-    sudo chmod g+x rssht-agent.sh
-    ```
+```bash
+sed -i 's/^\(SSH_USER=\).*$/\1<INTERMEDIATE-SSH-USER>/' rssht-agent.sh
+sed -i 's/^\(SSH_SERVER=\).*$/\1<INTERMEDIATE-SSH-SERVER>/' rssht-agent.sh
+sed -i 's/^\(SSH_PORT=\).*$/\1<INTERMEDIATE-SSH-PORT>/' rssht-agent.sh
+sed -i 's!^\(SWAP_DIRECTORY=\).*$!\1"<INTERMEDIATE-SWAP-DIRECTORY>"!' rssht-agent.sh
+```
 
-7.  Install, enable and start the *systemd unit*:
+7.  Give execution permission to the *agent*'s user:
 
-    ```bash
-    sudo cp rssht-agent.service /lib/systemd/system/
-    sudo systemctl enable rssht-agent.service
-    sudo systemctl start rssht-agent.service
-    ```
+```bash
+chmod u+x rssht-agent.sh
+```
+
+8.  Come back to original user and directory:
+
+```bash
+exit
+```
+
+9.  Install, enable and start the *systemd unit*:
+
+```bash
+sudo cp /home/rssht-agent/remote-ssh-tunnel-agent/rssht-agent.service /lib/systemd/system/
+sudo systemctl enable rssht-agent.service
+sudo systemctl start rssht-agent.service
+```
 
 ## Installation upgrade
 
@@ -60,30 +71,31 @@
 
 **NOTICE:** This method currently do not deploy (if upgraded) the *systemd unit* file [`rssht-agent.service`](https://github.com/guallo/remote-ssh-tunnel-agent/blob/master/rssht-agent.service).
 
-1.  Change to the installation directory:
+1.  Change to the *agent*'s user and installation directory:
 
 ```bash
-cd /opt/remote-ssh-tunnel-agent
+sudo -H -u rssht-agent bash
+cd $HOME/remote-ssh-tunnel-agent
 ```
 
 2.  Configure temporary identification:
 
 ```bash
-sudo git config user.name temp
-sudo git config user.email temp
+git config user.name temp
+git config user.email temp
 ```
 
 3.  Temporarily save the local changes:
 
 ```bash
-sudo git add -A
-sudo git commit -m 'temp'
+git add -A
+git commit -m 'temp'
 ```
 
 4.  Apply last remote changes:
 
 ```bash
-sudo git pull --rebase
+git pull --rebase
 ```
 
 5.  Resolve any conflicts (if any) that could arise from previous step.
@@ -91,19 +103,24 @@ sudo git pull --rebase
 6.  Restore the local changes:
 
 ```bash
-sudo git reset HEAD~1
-sudo chown :rssht-agent rssht-agent.sh
-sudo chmod g+x rssht-agent.sh
+git reset HEAD~1
+chmod u+x rssht-agent.sh
 ```
 
 7.  Discard temporary identification:
 
 ```bash
-sudo git config --unset user.name
-sudo git config --unset user.email
+git config --unset user.name
+git config --unset user.email
 ```
 
-8.  Restart the *agent service*:
+8.  Come back to original user and directory:
+
+```bash
+exit
+```
+
+9.  Restart the *agent service*:
 
 ```bash
 sudo systemctl restart rssht-agent.service
