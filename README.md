@@ -152,7 +152,7 @@ Match User rssht-server
     GatewayPorts yes
 EOF
 
-sudo systemctl restart ssh
+sudo systemctl restart sshd
 ```
 
 4.  Create the `<SWAP-DIRECTORY>` used by the *agents* to fetch commands from the `<SWAP-DIRECTORY>/<AGENT-ID>.in` file and notify status to the `<SWAP-DIRECTORY>/<AGENT-ID>.out` file:
