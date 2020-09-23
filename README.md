@@ -7,7 +7,7 @@
 1.  Create the user that will run the *agent service*:
 
 ```bash
-sudo adduser --system --group rssht-agent
+sudo useradd --system --create-home --user-group --shell "$(which nologin)" rssht-agent
 ```
 
 2.  Change to user `rssht-agent` and its `HOME` directory:
@@ -132,15 +132,21 @@ sudo systemctl restart rssht-agent.service
 
 ### Manual
 
-1.  Create the `<SSH-USER>` that the *agents* will use to fetch commands from and notify status to the `<SSH-SERVER>`, **IT IS WORTH TO METION THE IMPORTANCE OF ASSIGNING A VERY STRONG PASSWORD TO THIS USER**:
+1.  Create the `<SSH-USER>` that the *agents* will use to fetch commands from and notify status to the `<SSH-SERVER>`:
 
 ```bash
-sudo adduser --home /home/rssht-server --shell /bin/bash rssht-server
+sudo useradd --create-home --home-dir /home/rssht-server --shell /bin/bash rssht-server
 ```
 
-2.  It is convenient to set the `<SSH-PORT>` to `443` (commonly used for the *https* protocol) to avoid as much as possible the *agents* get blocked by their *ISP*'s. To do that configure `Port 443` into the `/etc/ssh/sshd_config` file.
+2.  Assign **A VERY STRONG** password to the `<SSH-USER>`:
 
-3.  Override the following settings for the `<SSH-USER>` and restart the *ssh* service:
+```bash
+sudo passwd rssht-server
+```
+
+3.  It is convenient to set the `<SSH-PORT>` to `443` (commonly used for the *https* protocol) to avoid as much as possible the *agents* get blocked by their *ISP*'s. To do that configure `Port 443` into the `/etc/ssh/sshd_config` file.
+
+4.  Override the following settings for the `<SSH-USER>` and restart the *ssh* service:
 
 ```bash
 sudo tee -a /etc/ssh/sshd_config >/dev/null <<EOF
@@ -155,13 +161,13 @@ EOF
 sudo systemctl restart sshd
 ```
 
-4.  Create the `<SWAP-DIRECTORY>` used by the *agents* to fetch commands from the `<SWAP-DIRECTORY>/<AGENT-ID>.in` file and notify status to the `<SWAP-DIRECTORY>/<AGENT-ID>.out` file:
+5.  Create the `<SWAP-DIRECTORY>` used by the *agents* to fetch commands from the `<SWAP-DIRECTORY>/<AGENT-ID>.in` file and notify status to the `<SWAP-DIRECTORY>/<AGENT-ID>.out` file:
 
 ```bash
 sudo -H -u rssht-server bash -c 'mkdir /home/rssht-server/rssht-swap-dir'
 ```
 
-5.  Protect the `<SWAP-DIRECTORY>`:
+6.  Protect the `<SWAP-DIRECTORY>`:
 
 ```bash
 sudo chmod 700 /home/rssht-server/rssht-swap-dir
