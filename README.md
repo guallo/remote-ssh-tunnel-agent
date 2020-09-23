@@ -144,12 +144,14 @@ sudo adduser --home /home/rssht-server --shell /bin/bash rssht-server
 
 ```bash
 sudo tee -a /etc/ssh/sshd_config >/dev/null <<EOF
+
 Match User rssht-server
     PasswordAuthentication yes
     PubkeyAuthentication yes
     AllowTcpForwarding yes
     GatewayPorts yes
 EOF
+
 sudo systemctl restart ssh
 ```
 
