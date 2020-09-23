@@ -17,26 +17,33 @@ sudo -H -u rssht-agent bash
 cd
 ```
 
-3.  Generate the public/private rsa key pair the *agent* will use to connect to the *intermediate SSH server*, replace `<AGENT-ID>` accordingly:
+3.  Ensure `.ssh` directory exists and has correct permissions:
+
+```bash
+mkdir -p .ssh
+chmod 700 .ssh
+```
+
+4.  Generate the public/private rsa key pair the *agent* will use to connect to the *intermediate SSH server*, replace `<AGENT-ID>` accordingly:
 
 ```bash
 ssh-keygen -C "<AGENT-ID>" -N "" -f ".ssh/id_rsa"
 ```
 
-4.  Copy the public key to the *intermediate SSH server*, replace `<SSH-USER>`, `<SSH-SERVER>` and `<SSH-PORT>` accordingly (see [the configuration of the intermediate SSH server](#manual-1)):
+5.  Copy the public key to the *intermediate SSH server*, replace `<SSH-USER>`, `<SSH-SERVER>` and `<SSH-PORT>` accordingly (see [the configuration of the intermediate SSH server](#manual-1)):
 
 ```bash
 ssh-copy-id -i ".ssh/id_rsa.pub" <SSH-USER>@<SSH-SERVER> -p <SSH-PORT>
 ```
 
-5.  Download and change to the source code directory:
+6.  Download and change to the source code directory:
 
 ```bash
 git clone https://github.com/guallo/remote-ssh-tunnel-agent.git
 cd remote-ssh-tunnel-agent
 ```
 
-6.  Configure the *agent* with the corresponding `<OPTION>`'s (see [the configuration of the intermediate SSH server](#manual-1)):
+7.  Configure the *agent* with the corresponding `<OPTION>`'s (see [the configuration of the intermediate SSH server](#manual-1)):
 
 ```bash
 sed -i 's/^\(SSH_USER=\).*$/\1<SSH-USER>/' rssht-agent.sh
@@ -45,19 +52,19 @@ sed -i 's/^\(SSH_PORT=\).*$/\1<SSH-PORT>/' rssht-agent.sh
 sed -i 's!^\(SWAP_DIRECTORY=\).*$!\1"<SWAP-DIRECTORY>"!' rssht-agent.sh
 ```
 
-7.  Give execution permission to the *agent*'s user:
+8.  Give execution permission to the *agent*'s user:
 
 ```bash
 chmod u+x rssht-agent.sh
 ```
 
-8.  Come back to original user and directory:
+9.  Come back to original user and directory:
 
 ```bash
 exit
 ```
 
-9.  Install, enable and start the *systemd unit*:
+10.  Install, enable and start the *systemd unit*:
 
 ```bash
 sudo cp /home/rssht-agent/remote-ssh-tunnel-agent/rssht-agent.service /lib/systemd/system/
